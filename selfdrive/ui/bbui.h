@@ -721,39 +721,6 @@ void ui_draw_vision_grid( UIState *s) {
   }
 }
 
-void bb_ui_draw_logo( UIState *s) {
-  if ((s->status != STATUS_DISENGAGED) && (s->status != STATUS_STOPPED)) { //(s->status != STATUS_DISENGAGED) {//
-    return;
-  }
-  int rduration = 8000;
-  int logot = (bb_currentTimeInMilis() % rduration);
-  int logoi = s->b.img_logo;
-  if ((logot > (int)(rduration/4)) && (logot < (int)(3*rduration/4))) {
-    logoi = s->b.img_logo2;
-  }
-  if (logot < (int)(rduration/2)) {
-    logot = logot - (int)(rduration/4);
-  } else {
-    logot = logot - (int)(3*rduration/4);
-  }
-  float logop = fabs(4.0*logot/rduration);
-  const UIScene *scene = &s->scene;
-  const int ui_viz_rx = scene->ui_viz_rx;
-  const int ui_viz_rw = scene->ui_viz_rw;
-  const int viz_event_w = (int)(820 * logop);
-  const int viz_event_h = 820;
-  const int viz_event_x = (ui_viz_rx + (ui_viz_rw - viz_event_w - bdr_s*2)/2);
-  const int viz_event_y = 200;
-  bool is_engageable = scene->engageable;
-  float viz_event_alpha = 1.0f;
-  nvgBeginPath(s->vg);
-  NVGpaint imgPaint = nvgImagePattern(s->vg, viz_event_x, viz_event_y,
-  viz_event_w, viz_event_h, 0, logoi, viz_event_alpha);
-  nvgRect(s->vg, viz_event_x, viz_event_y, (int)viz_event_w, viz_event_h);
-  nvgFillPaint(s->vg, imgPaint);
-  nvgFill(s->vg);
-}
-
 
 
 void bb_ui_draw_UI( UIState *s) {
@@ -786,7 +753,6 @@ void bb_ui_draw_UI( UIState *s) {
     bb_ui_draw_measures_right(s,bb_dmr_x, bb_dmr_y, bb_dmr_w );
     bb_draw_buttons(s);
     bb_ui_draw_custom_alert(s);
-    bb_ui_draw_logo(s);
 	 }
 
    if (s->b.tri_state_switch ==2) {
@@ -800,8 +766,6 @@ void bb_ui_draw_UI( UIState *s) {
 	  const int bb_dmr_y = (box_y + (bdr_s*1.5))+220;
     bb_draw_buttons(s);
     bb_ui_draw_custom_alert(s);
-    bb_ui_draw_logo(s);
-    //bb_ui_draw_car(s);
 	 }
 	 if (s->b.tri_state_switch ==3) {
 	 	ui_draw_vision_grid(s);
@@ -845,8 +809,6 @@ void bb_ui_init(UIState *s) {
     s->b.gps_sock_raw = zsock_resolve(s->b.gps_sock);
 
     //BB Load Images
-    s->b.img_logo = nvgCreateImage(s->vg, "../assets/img_spinner_comma.png", 1);
-    s->b.img_logo2 = nvgCreateImage(s->vg, "../assets/img_spinner_comma2.png", 1);
     s->b.img_car = nvgCreateImage(s->vg, "../assets/img_car_tesla.png", 1);
 }
 
@@ -960,20 +922,6 @@ void  bb_ui_poll_update( UIState *s) {
             strcpy(s->b.car_model, (char *) datad.icCarName.str);
             strcpy(s->b.car_folder, (char *) datad.icCarFolder.str);
             LOGW("Car folder set (%s)", s->b.car_folder);
-
-            if (strcmp(s->b.car_folder,"tesla")==0) {
-              s->b.img_logo = nvgCreateImage(s->vg, "../assets/img_spinner_comma.png", 1);
-              s->b.img_logo2 = nvgCreateImage(s->vg, "../assets/img_spinner_comma2.png", 1);
-              LOGW("Spinning logo set for Tesla");
-            } else if (strcmp(s->b.car_folder,"honda")==0) {
-              s->b.img_logo = nvgCreateImage(s->vg, "../assets/img_spinner_comma.honda.png", 1);
-              s->b.img_logo2 = nvgCreateImage(s->vg, "../assets/img_spinner_comma.honda2.png", 1);
-              LOGW("Spinning logo set for Honda");
-            } else if (strcmp(s->b.car_folder,"toyota")==0) {
-              s->b.img_logo = nvgCreateImage(s->vg, "../assets/img_spinner_comma.toyota.png", 1);
-              s->b.img_logo2 = nvgCreateImage(s->vg, "../assets/img_spinner_comma.toyota2.png", 1);
-              LOGW("Spinning logo set for Toyota");
-            };
           }
           capn_free(&ctx);
           zmq_msg_close(&msg);
