@@ -1033,6 +1033,9 @@ void  bb_ui_poll_update( UIState *s) {
             {
                 s->b.gpsAccuracy=99.8;
             }
+            b.gpsBearing = datad.bearing
+            b.gpsLatitude = datad.latitude
+            b.gpsLongitute = datad.longitude
             capn_free(&ctx);
             zmq_msg_close(&msg);
         }
