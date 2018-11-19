@@ -145,4 +145,4 @@ class LatControl(object):
         self.blindspot_blink_counter_left_check = 0
 
     self.sat_flag = self.pid.saturated
-    return output_steer, float(self.angle_steers_des)
+    return output_steer, float(self.angle_steers_des), math.degrees(list(self.mpc_solution[0].delta)[-1] * VM.CP.steerRatio)
