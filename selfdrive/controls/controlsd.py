@@ -3,7 +3,7 @@ import gc
 import json
 import zmq
 from cereal import car, log
-from common.numpy_fast import clip
+from common.numpy_fast import clip, interp
 from common.realtime import sec_since_boot, set_realtime_priority, Ratekeeper
 from common.profiler import Profiler
 from common.params import Params
@@ -284,15 +284,26 @@ def state_control(plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, 
     CP.gasMaxV = [0.2, 0.2, 0.2]
   else:
     CP.gasMaxV = [0.3, 0.7, 0.9]
+    
+  # *** steering PID loop ***
+  actuators.steer, actuators.steerAngle, angle_later = LaC.update(active, CS.vEgo, CS.steeringAngle,
+                                                     CS.steeringPressed, plan.dPoly, angle_offset, VM, PL,CS.blindspot,CS.leftBlinker,CS.rightBlinker)
+  print "steerAngle"
+  print actuators.steerAngle
+  print "angle_later"
+  print angle_later
+  Angle = [0, 5, 10, 15,20,25,30,35,60,100,180,270,500]
+  Angle_Speed = [255,150,90,75,60,50,45,40,30,20,15,10,5]
+  v_cruise_turn = int(min(v_cruise_kph, interp(abs(angle_later), Angle, Angle_Speed)))
+  print "v_cruise_turn"
+  print v_cruise_turn
+  print "v_cruise"
+  print v_cruise_kph
   # *** gas/brake PID loop ***
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
-                                              v_cruise_kph, plan.vTarget, plan.vTargetFuture, plan.aTarget,
-                                              CP, PL.lead_1)
-
-  # *** steering PID loop ***
-  actuators.steer, actuators.steerAngle = LaC.update(active, CS.vEgo, CS.steeringAngle,
-                                                     CS.steeringPressed, plan.dPoly, angle_offset, VM, PL,CS.blindspot,CS.leftBlinker,CS.rightBlinker)
- #BB added for ALCA support
+                                              v_cruise_turn, plan.vTarget, plan.vTargetFuture, plan.aTarget,
+                                              CP, PL.lead_1)                           
+  # BB added for ALCA support
   #CS.pid = LaC.pid
   # send a "steering required alert" if saturation count has reached the limit
   if LaC.sat_flag and CP.steerLimitAlert:
