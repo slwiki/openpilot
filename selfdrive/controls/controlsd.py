@@ -293,7 +293,7 @@ def state_control(plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, 
   print "angle_later"
   print angle_later
   Angle = [0, 5, 10, 15,20,25,30,35,60,100,180,270,500]
-  Angle_Speed = [255,150,90,75,60,50,45,40,30,20,15,10,5]
+  Angle_Speed = [255,120,70,60,50,40,35,30,25,20,15,10,5]
   v_cruise_turn = int(min(v_cruise_kph, interp(abs(angle_later), Angle, Angle_Speed)))
   print "v_cruise_turn"
   print v_cruise_turn
