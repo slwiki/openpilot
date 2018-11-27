@@ -288,20 +288,20 @@ def state_control(plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, 
   # *** steering PID loop ***
   actuators.steer, actuators.steerAngle, angle_later = LaC.update(active, CS.vEgo, CS.steeringAngle,
                                                      CS.steeringPressed, plan.dPoly, angle_offset, VM, PL,CS.blindspot,CS.leftBlinker,CS.rightBlinker)
-  print "steerAngle"
-  print actuators.steerAngle
-  print "angle_later"
-  print angle_later
-  Angle = [0, 5, 10, 15,20,25,30,35,60,100,180,270,500]
-  Angle_Speed = [255,100,60,50,40,35,30,25,20,15,10,7,5]
-  v_cruise_turn = int(min(v_cruise_kph, interp(abs(angle_later), Angle, Angle_Speed)))
-  print "v_cruise_turn"
-  print v_cruise_turn
-  print "v_cruise"
-  print v_cruise_kph
+  #print "steerAngle"
+  #print actuators.steerAngle
+  #print "angle_later"
+  #print angle_later
+  #Angle = [0, 5, 10, 15,20,25,30,35,60,100,180,270,500]
+  #Angle_Speed = [255,100,60,50,40,35,30,25,20,15,10,7,5]
+  #v_cruise_turn = int(min(v_cruise_kph, interp(abs(angle_later), Angle, Angle_Speed)))
+  #print "v_cruise_turn"
+  #print v_cruise_turn
+  #print "v_cruise"
+  #print v_cruise_kph
   # *** gas/brake PID loop ***
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
-                                              v_cruise_turn, plan.vTarget, plan.vTargetFuture, plan.aTarget,
+                                              v_cruise_kph, plan.vTarget, plan.vTargetFuture, plan.aTarget,
                                               CP, PL.lead_1)                           
   # BB added for ALCA support
   #CS.pid = LaC.pid
@@ -320,7 +320,7 @@ def state_control(plan, CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, 
   # *** process alerts ***
   AM.process_alerts(sec_since_boot())
 
-  return actuators, v_cruise_kph, driver_status, angle_offset
+  return actuators, v_cruise_kph, driver_status, angle_offset, angle_later
 
 
 def data_send(perception_state, plan, plan_ts, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, carstate,
