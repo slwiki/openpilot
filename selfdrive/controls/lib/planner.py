@@ -358,7 +358,7 @@ class Planner(object):
     self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
 
   # this runs whenever we get a packet that can change the plan
-  def update(self, CS, LaC, LoC, v_cruise_kph, force_slow_decel):
+  def update(self, CS, LaC, LoC, v_cruise_kph, force_slow_decel, angle_later):
     cur_time = sec_since_boot()
     v_cruise_setpoint = v_cruise_kph * CV.KPH_TO_MS
 
