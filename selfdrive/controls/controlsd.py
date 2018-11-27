@@ -127,10 +127,10 @@ def data_sample(CI, CC, thermal, calibration, health, driver_monitor, gps_locati
   return CS, events, cal_status, cal_perc, overtemp, free_space, low_battery, mismatch_counter
 
 
-def calc_plan(CS, CP, events, PL, LaC, LoC, v_cruise_kph, driver_status, geofence):
+def calc_plan(CS, CP, events, PL, LaC, LoC, v_cruise_kph, driver_status, geofence, angle_later):
    # plan runs always, independently of the state
    force_decel = driver_status.awareness < 0. or (geofence is not None and not geofence.in_geofence)
-   plan_packet = PL.update(CS, LaC, LoC, v_cruise_kph, force_decel)
+   plan_packet = PL.update(CS, LaC, LoC, v_cruise_kph, force_decel, angle_later)
    plan = plan_packet.plan
    plan_ts = plan_packet.logMonoTime
 
@@ -529,10 +529,6 @@ def controlsd_thread(gctx=None, rate=100, default_bias=0.):
       driver_monitor, gps_location, poller, cal_status, cal_perc, overtemp, free_space, low_battery, driver_status, geofence, state, mismatch_counter, params)
     prof.checkpoint("Sample")
 
-    # define plan
-    plan, plan_ts = calc_plan(CS, CP, events, PL, LaC, LoC, v_cruise_kph, driver_status, geofence)
-    prof.checkpoint("Plan")
-
     if not passive:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
@@ -543,7 +539,11 @@ def controlsd_thread(gctx=None, rate=100, default_bias=0.):
     actuators, v_cruise_kph, driver_status, angle_offset, angle_later = state_control(plan, CS, CP, state, events, v_cruise_kph,
       v_cruise_kph_last, AM, rk, driver_status, PL, LaC, LoC, VM, angle_offset, passive, is_metric, cal_perc)
     prof.checkpoint("State Control")
-
+    
+    # define plan
+    plan, plan_ts = calc_plan(CS, CP, events, PL, LaC, LoC, v_cruise_kph, driver_status, geofence, angle_later)
+    prof.checkpoint("Plan")
+    
     # publish data
     CC = data_send(PL.perception_state, plan, plan_ts, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, carstate, carcontrol,
       live100, livempc, AM, driver_status, LaC, LoC, angle_offset, passive)
